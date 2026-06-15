@@ -1,40 +1,55 @@
-function getResponse(){
+async function getResponse() {
 
-let input =
-document.getElementById("userInput")
-.value.toLowerCase();
+    let input = document.getElementById("userInput").value;
 
-let response="";
+    let responseBox = document.getElementById("response");
 
-if(input.includes("rice")){
+    responseBox.innerHTML = "Thinking... 🤖";
 
-response=
-"You can make vegetable fried rice and use leftover vegetables.";
+    const apiKey = "AQ.Ab8RN6LhBVUL3GB0Q-XjoE-mI92jIQPkR6ii0HH06vaALrzD4Q";
 
-}
+    const prompt = `
+You are FoodWise AI.
 
-else if(input.includes("bread")){
+Your job is to help reduce food waste.
 
-response=
-"You can make sandwiches instead of throwing away old bread.";
+User input (ingredients or food item): ${input}
 
-}
+Give:
+- 2 meal ideas
+- 1 storage tip
+- 1 waste reduction tip
 
-else if(input.includes("tomato")){
+Keep response short and simple.
+`;
 
-response=
-"Use tomatoes for soup, pasta sauce, or salad.";
+    try {
+        const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    contents: [
+                        {
+                            parts: [
+                                { text: prompt }
+                            ]
+                        }
+                    ]
+                })
+            }
+        );
 
-}
+        const data = await res.json();
 
-else{
+        let aiText = data.candidates[0].content.parts[0].text;
 
-response=
-"Try combining available ingredients into a simple meal to reduce food waste.";
+        responseBox.innerHTML = aiText;
 
-}
-
-document.getElementById("response")
-.innerHTML=response;
-
+    } catch (error) {
+        responseBox.innerHTML = "Error connecting to AI. Please try again.";
+    }
 }
